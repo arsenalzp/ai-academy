@@ -8,7 +8,10 @@ from typing import Any, Dict, List
 
 import yaml
 
-from models import PolicyDecision
+try:
+    from .models import PolicyDecision
+except ImportError:
+    from models import PolicyDecision
 
 
 def _read_policy_files(policy_dir_path: Path) -> List[Dict[str, Any]]:

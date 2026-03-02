@@ -6,11 +6,18 @@ import sys
 import time
 from typing import List
 
-from config import load_settings
-from models import QueryResponse
-from policy_engine import evaluate_query
-from retriever import answer_with_citation
-from structured_logger import utc_now_iso, write_jsonl
+try:
+    from .config import load_settings
+    from .models import QueryResponse
+    from .policy_engine import evaluate_query
+    from .retriever import answer_with_citation
+    from .structured_logger import utc_now_iso, write_jsonl
+except ImportError:
+    from config import load_settings
+    from models import QueryResponse
+    from policy_engine import evaluate_query
+    from retriever import answer_with_citation
+    from structured_logger import utc_now_iso, write_jsonl
 
 
 def _build_blocked_response(message: str) -> QueryResponse:
