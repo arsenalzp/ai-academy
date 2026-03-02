@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://governance.example.org/schemas/audit-log/1.1.0/audit-log-schema.json",
+  "title": "High-Risk AI Helpdesk Audit Log Event",
+  "description": "Versioned audit log schema for EU AI Act High-Risk AI system (Art. 9–15 compliant traceability).",
+  "type": "object",
+  "additionalProperties": false,
+
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[a-fA-F0-9]{64}$"
+    }
+  },
+
+  "required": [
+    "event_id",
+    "event_schema_id",
+    "event_schema_version",
+    "event_schema_digest",
+    "timestamp",
+    "event_type",
+    "trace",
+    "ai_system",
+    "actor",
+    "policy_decision",
+    "integrity"
+  ],
+
+  "properties": {
+    "event_schema_id": {
+      "type": "string",
+      "description": "Logical identifier of schema family (e.g., 'audit-log')."
+    },
+
+    "event_schema_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Semantic version of the schema used to validate this event."
+    },
+
+    "event_schema_digest": {
+      "$ref": "#/$defs/sha256",
+      "description": "SHA-256 digest of the canonical schema file used at runtime."
+    },
+
+    "schema_compatibility_level": {
+      "type": "string",
+      "enum": ["major", "minor", "patch"],
+      "description": "Declared compatibility impact of this schema version."
+    },
+
+    "event_id": {
+      "type": "string",
+      "description": "Globally unique event id (UUIDv7 recommended)."
+    },
+
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 UTC timestamp."
+    },
+
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "query_received",
+        "response_generated",
+        "policy_decision",
+        "tool_call",
+        "retrieval",
+        "handoff_human",
+        "incident",
+        "system_config_change",
+        "model_version_change",
+        "cicd_deploy",
+        "cicd_gate_result"
+      ]
+    },
+
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trace_id", "interaction_id", "session_id"],
+      "properties": {
+        "trace_id": { "type": "string" },
+        "span_id": { "type": ["string", "null"] },
+        "parent_span_id": { "type": ["string", "null"] },
+        "interaction_id": { "type": "string" },
+        "session_id": { "type": "string" },
+        "request_id": { "type": ["string", "null"] }
+      }
+    },
+
+    "ai_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_id", "environment", "model", "deployment"],
+      "properties": {
+        "system_id": { "type": "string" },
+        "environment": { "type": "string", "enum": ["dev", "test", "staging", "prod"] },
+        "model": {
+          "type": "object",
+          "required": ["model_id", "model_version"],
+          "properties": {
+            "model_id": { "type": "string" },
+            "model_version": { "type": "string" }
+          }
+        },
+        "deployment": {
+          "type": "object",
+          "required": ["git_sha", "artifact_digest"],
+          "properties": {
+            "git_sha": { "type": "string" },
+            "artifact_digest": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    },
+
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_type", "pseudonymous_user_id"],
+      "properties": {
+        "actor_type": {
+          "type": "string",
+          "enum": ["end_user", "admin", "system", "developer", "auditor"]
+        },
+        "pseudonymous_user_id": { "type": "string" }
+      }
+    },
+
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query_hash"],
+      "properties": {
+        "query_hash": { "$ref": "#/$defs/sha256" },
+        "response_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+
+    "policy_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "action"],
+      "properties": {
+        "rule_id": { "type": "string" },
+        "policy_version": { "type": "string" },
+        "action": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "allow_with_redactions",
+            "block",
+            "escalate_to_human",
+            "rate_limit",
+            "sandbox"
+          ]
+        }
+      }
+    },
+
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_hash", "prev_record_hash", "signature", "key_id"],
+      "properties": {
+        "record_hash": { "$ref": "#/$defs/sha256" },
+        "prev_record_hash": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "signature": { "type": "string" },
+        "key_id": { "type": "string" }
+      }
+    }
+  }
+}
