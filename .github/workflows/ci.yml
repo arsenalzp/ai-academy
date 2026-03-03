@@ -25,8 +25,14 @@ jobs:
       - name: Lint
         run: flake8 src tests
 
-      - name: Test
-        run: pytest -q
+      - name: Pipeline tests
+        run: pytest -q tests/test_pipeline.py
+
+      - name: CI/CD smoke tests
+        run: pytest -q tests/test_cicd_smoke.py
+
+      - name: Validation pipeline tests
+        run: pytest -q tests/test_validation_layer.py
 
   policy-validation:
     runs-on: ubuntu-latest
