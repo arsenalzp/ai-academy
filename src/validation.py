@@ -57,7 +57,11 @@ def _normalize_language_code(language_value: str) -> str:
 
 
 def _extract_declared_language(html_blob: str) -> Optional[str]:
-    html_lang_match = re.search(r"<html[^>]+(?:lang|xml:lang)=[\"']([^\"']+)[\"']", html_blob, flags=re.IGNORECASE)
+    html_lang_match = re.search(
+        r"<html[^>]+(?:lang|xml:lang)=[\"']([^\"']+)[\"']",
+        html_blob,
+        flags=re.IGNORECASE,
+    )
     if html_lang_match:
         return _normalize_language_code(html_lang_match.group(1))
 
@@ -92,7 +96,9 @@ def _apply_language_and_pii_checks(
         report["checks"]["language"] = f"FAIL:{declared_language}"
 
     email_count = _count_emails(text)
-    report["checks"]["pii"] = "PASS" if email_count == 0 else f"WARN:{email_count} emails"
+    report["checks"]["pii"] = (
+        "PASS" if email_count == 0 else f"WARN:{email_count} emails"
+    )
 
 
 def _to_utc(dt_value: datetime) -> datetime:
@@ -141,8 +147,16 @@ def _parse_datetime(value: object) -> Optional[datetime]:
 
 def _extract_html_last_modified(html_blob: str) -> Tuple[Optional[datetime], Optional[str]]:
     patterns = (
-        r"<meta[^>]+(?:name|property)=[\"'](?:last-modified|last_modified|article:modified_time|og:updated_time)[\"'][^>]+content=[\"']([^\"']+)[\"'][^>]*>",
-        r"<meta[^>]+content=[\"']([^\"']+)[\"'][^>]+(?:name|property)=[\"'](?:last-modified|last_modified|article:modified_time|og:updated_time)[\"'][^>]*>",
+        (
+            r"<meta[^>]+(?:name|property)=[\"'](?:last-modified|last_modified|"
+            r"article:modified_time|og:updated_time)[\"'][^>]+content=[\"']([^\"']+)"
+            r"[\"'][^>]*>"
+        ),
+        (
+            r"<meta[^>]+content=[\"']([^\"']+)[\"'][^>]+(?:name|property)=[\"']"
+            r"(?:last-modified|last_modified|article:modified_time|og:updated_time)[\"']"
+            r"[^>]*>"
+        ),
         r"<time[^>]+datetime=[\"']([^\"']+)[\"'][^>]*>",
     )
     for pattern in patterns:
@@ -217,7 +231,7 @@ def staleness_scan(
     report["metadata"] = metadata
 
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    
+
     return report
 
 
@@ -248,7 +262,7 @@ def duplicate_detection(
         html_blob=page.html_blob,
         expected_language=expected_language,
     )
-    
+
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     return report

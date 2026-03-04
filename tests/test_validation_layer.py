@@ -55,6 +55,7 @@ def test_duplicate_detection_processes_one_page_against_hash_list() -> None:
     assert page_b_report["page_id"] == "page-b"
     assert page_b_report["checks"]["duplicate"] == "FAIL"
 
+
 def test_report_uses_html_lang_property_when_present() -> None:
     """If html lang is not en, report should return FAIL:<lang> based on lang property."""
     html = """
