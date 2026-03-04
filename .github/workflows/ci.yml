@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  PYTHONPATH: .
+
 jobs:
   quality-gates:
     runs-on: ubuntu-latest
